@@ -313,24 +313,19 @@ app.get('/getcart', fetchUser, async (req, res) => {
     }
 });
 //creating end point to remove data from cart
-app.post('/removefromcart', fetchUser, async (req, res) => {
+app.post('/removeproduct', async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+        const result = await Product.findOneAndDelete({ id: req.body.id });
+        if (!result) {
+            return res.status(404).json({ success: false, message: "Product not found" });
         }
-
-        const { itemId } = req.body;
-        if (user.cartData[itemId] > 0) {
-            user.cartData[itemId] -= 1;
-            await user.save();
-            res.json({ success: true, cartData: user.cartData });
-        } else {
-            res.status(400).json({ success: false, message: "Item not in cart or quantity is already zero" });
-        }
+        res.json({
+            success: true,
+            id: req.body.id
+        });
     } catch (error) {
-        console.error("Error removing from cart:", error);
-        res.status(500).json({ success: false, message: "Failed to remove from cart" });
+        console.error("Error removing product:", error);
+        res.status(500).json({ success: false, message: "Failed to remove product" });
     }
 });
 
