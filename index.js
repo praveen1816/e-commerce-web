@@ -16,14 +16,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Environment variables
 const URI = process.env.MongoDBURI;
-const TOKEN = process.env.ACCESSTOKEN;
+const TOKEN=process.env.ACCESSTOKEN;
 
 // Connect to MongoDB
 mongoose.connect(URI)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((error) => console.error("Error connecting to MongoDB:", error));
+.then(() => console.log("Connected to MongoDB"))
+.catch((error) => console.error("Error connecting to MongoDB:", error));
+
 
 // Create the upload directory if it doesn't exist
 const uploadDir = path.join(__dirname, 'upload/images');
@@ -150,7 +150,7 @@ app.post('/signup', async (req, res) => {
         await user.save();
 
         // Create and send a JWT token
-        const token = jwt.sign({ id: user._id }, TOKEN, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id },TOKEN, { expiresIn: '1h' });
         res.json({ success: true, token });
     } catch (error) {
         console.error("Error signing up user:", error);
@@ -230,7 +230,7 @@ app.post('/login', async (req, res) => {
         }
 
         // Create and send a JWT token
-        const token = jwt.sign({ id: user._id }, TOKEN, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id }, 'new_secret_key', { expiresIn: '1h' });
         res.json({ success: true, token });
     } catch (error) {
         console.error("Error logging in user:", error);
@@ -269,7 +269,7 @@ const fetchUser = async (req, res, next) => {
         return res.status(401).json({ error: 'Please authenticate with a valid token' });
     }
     try {
-        const data = jwt.verify(token, TOKEN);
+        const data = jwt.verify(token, 'new_secret_key');
         req.user = data;
         next();
     } catch (error) {
@@ -312,8 +312,7 @@ app.get('/getcart', fetchUser, async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to fetch cart data" });
     }
 });
-
-// Endpoint to remove data from cart
+//creating end point to remove data from cart
 app.post('/removefromcart', fetchUser, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
@@ -333,6 +332,12 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
         console.error("Error removing from cart:", error);
         res.status(500).json({ success: false, message: "Failed to remove from cart" });
     }
+});
+
+app.post('/getcart', fetchUser, async (req, res) => {
+    console.log("GetCart");
+    let userData = await User.findOne({ _id: req.user.id });
+    res.json(userData.cartData);
 });
 
 // Start server
