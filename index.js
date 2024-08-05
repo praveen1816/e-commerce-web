@@ -8,7 +8,6 @@ const fs = require("fs");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv');
-const helmet = require('helmet');
 
 dotenv.config(); // Load environment variables
 
@@ -16,8 +15,8 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
-app.use(helmet()); // Adding security headers
 
+// Environment variables
 const URI = process.env.MongoDBURI;
 const TOKEN = process.env.ACCESSTOKEN;
 
